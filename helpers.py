@@ -140,7 +140,7 @@ def get_metrics(pred, y, thresh):
                     'top100': compute_topN(pred, y, 100),
                     'top500': compute_topN(pred, y, 500),
                     'top1000': compute_topN(pred, y, 1000),
-                    'valid_auc': metrics.roc_auc_score(y, pred > thresh),
+                    'valid_auc': metrics.roc_auc_score(y, pred),
                     'tp': tp, 'fp': fp, 'tn': tn, 'fn': fn,
                     'prec': prec, 'rec': rec}
     return metrics_dict
@@ -225,4 +225,27 @@ def plot_map(df_all, title, pause=False):
         plt.pause(3)
         plt.close()
 
+
+def plot_heatmap(df_train, df_valid, heatmap_val, title='East African Hopper Locust detection via Sentenel 2 Imagery'):
+    gdf_train = gpd.GeoDataFrame(df_train, geometry=gpd.points_from_xy(df_train.lat, df_train.lon))
+    gdf_valid = gpd.GeoDataFrame(df_valid, geometry=gpd.points_from_xy(df_valid.lat, df_valid.lon))
+    world = gpd.read_file(gpd.datasets.get_path('naturalearth_lowres'))
+    fig, ax = plt.subplots(1, 1, figsize=(15, 15))
+    fig.suptitle(f'{title}', fontsize=20)
+    world[world.name.isin(['Ethiopia'])].plot(color='white', edgecolor='Black', ax=ax)
+
+    # Plot heatmap for all validation predictions
+    gdf_valid.sort_values(by=[heatmap_val], ascending=False).plot(ax=ax,
+                                                                  column=heatmap_val,
+                                                                  cmap='viridis',
+                                                                  vmin=gdf_valid[heatmap_val].min(),
+                                                                  vmax=gdf_valid[heatmap_val].max(),
+                                                                  markersize=5)
+    sm = plt.cm.ScalarMappable(cmap='viridis',
+                               norm=plt.Normalize(vmin=gdf_valid[heatmap_val].min(), vmax=gdf_valid[heatmap_val].max()))
+    cax = fig.add_axes([0.9, 0.1, 0.03, 0.8])
+    fig.colorbar(sm, cax=cax)
+
+    gdf_train.loc[gdf_train['hoppers'] == 1].plot(ax=ax, color='cyan', markersize=10)
+    gdf_valid.loc[gdf_valid['hoppers'] == 1].plot(ax=ax, color='red', markersize=10)
 
