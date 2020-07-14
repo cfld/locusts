@@ -1,19 +1,14 @@
-from datetime import date
-import json
-
+import os
+import geohash
+import argparse
 import pandas as pd
 import numpy as np
-import bcolz
-import os
 from tifffile import imread
 from glob import glob
 from zipfile import ZipFile
+from tqdm import tqdm
 
 from joblib import Parallel, delayed
-
-from tqdm.notebook import tqdm
-
-import geohash
 
 
 from helpers import get_labels, get_locusthub_df
