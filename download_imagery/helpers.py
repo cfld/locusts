@@ -133,8 +133,8 @@ def zip2numpy_sentinel(inpath):
 def get_one_sentinel(loc, outdir):
     outpath = os.path.join(outdir, loc['geohash'] + '_' + str(loc['date_start']) + '.zip')
 
-    cell = geohashes2cell([loc['geohash']])[0]
-    mosaic = (
+    cell    = geohashes2cell([loc['geohash']])[0]
+    mosaic  = (
         ee.ImageCollection('COPERNICUS/S2')
             .select(sentinel_channels)
             .filterDate(loc['date_start'], loc['date_end'])
@@ -146,3 +146,35 @@ def get_one_sentinel(loc, outdir):
         _ = safe_urlretrieve(url, outpath)
     except:
         pass
+
+
+glads_bands = ['ECanop_tavg',  #Canopy water evaporation
+               'Evap_tavg',  #Evapotranspiration
+               'PotEvap_tavg', #Potential evaporation rate
+               'Psurf_f_inst',  #Pressure
+               'Qair_f_inst',  #Specific humidity
+               'Qg_tavg',  #Heat flux
+               'Rainf_f_tavg',  #Total precipitation rate
+               'RootMoist_inst',  #Root zone soil moisture
+               'SoilMoi0_10cm_inst',  #Soil moisture
+               'SoilMoi10_40cm_inst',  # Soil moisture
+               'SoilTMP0_10cm_inst',  #Soil temperature
+               'SoilTMP10_40cm_inst',  # Soil temperature
+               'Tair_f_inst',  #Air temperature
+               'Tveg_tavg',  #Transpiration
+               'Wind_f_inst',  #Wind speed
+               ]
+
+def get_one_gldas(loc, outdir):
+
+    outpath = os.path.join(outdir, loc['geohash'] + '_' + str(loc['date_start']) + '.zip')
+
+    cell    = geohashes2cell([loc['geohash']])[0]
+    mosaic  = (
+        ee.ImageCollection('NASA/GLDAS/V021/NOAH/G025/T3H')
+            .select(glads_bands)
+            .filterDate(loc['date_start'], loc['date_end'])
+    ).reduce(ee.Reducer.percentile([0, 25, 50, 75, 100]))
+
+    url = mosaic.clip(cell).getDownloadURL(params={"name": loc['geohash'], "crs": "EPSG:4326"})#, "scale": 10000})
+    _ = safe_urlretrieve(url, outpath)
