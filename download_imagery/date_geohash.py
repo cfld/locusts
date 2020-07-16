@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-    ethiopia_locust.py
+    date_geohash.py
 """
 
 import os
