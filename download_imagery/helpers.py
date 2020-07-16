@@ -176,5 +176,5 @@ def get_one_gldas(loc, outdir):
             .filterDate(loc['date_start'], loc['date_end'])
     ).reduce(ee.Reducer.percentile([0, 25, 50, 75, 100]))
 
-    url = mosaic.clip(cell).getDownloadURL(params={"name": loc['geohash'], "crs": "EPSG:4326"})#, "scale": 10000})
+    url = mosaic.clip(cell).getDownloadURL(params={"name": loc['geohash'], "crs": "EPSG:4326"})
     _ = safe_urlretrieve(url, outpath)
